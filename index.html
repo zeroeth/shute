@@ -1,0 +1,98 @@
+<html>
+  <head>
+    <script src='http://cdn.html5quintus.com/v0.2.0/quintus-all.js'></script>
+	<style>
+		canvas { background-color: black; }
+	</style>
+  </head>
+   <body>
+     <script>
+		// This game uses images from:
+	 	// http://opengameart.org/content/space-shooter-redux
+		var Q = Quintus()
+			.include("Sprites, Scenes, Input, 2D, Touch, UI")
+			.setup({maximize: true})
+			.controls()
+			.touch();
+
+
+		// Player controlled ship
+		//
+		Q.Sprite.extend("PlayerShip",
+		{
+			init: function(p)
+			{
+				p.asset = "ship_sprite";
+				p.rotation_speed = 200;
+				p.thrust_speed = 10;
+
+				this._super(p);
+				this.add("2d");
+			},
+
+			step: function(delta)
+			{
+				     if(Q.inputs["right"]) { this.p.angle += this.p.rotation_speed * delta; }
+				else if(Q.inputs["left"])  { this.p.angle -= this.p.rotation_speed * delta; }
+
+				if(Q.inputs["up"])
+				{
+					var thrustX =  Math.sin(this.p.angle * Math.PI / 180),
+						thrustY = -Math.cos(this.p.angle * Math.PI / 180);
+
+					this.p.vx += thrustX * this.p.thrust_speed;
+					this.p.vy += thrustY * this.p.thrust_speed;
+				}
+			}
+		});
+
+
+		// Asteroid that floats around the screen
+		//
+		Q.Sprite.extend("Asteroid",
+		{
+			init: function(p)
+			{
+				p.asset = "large_asteroid";
+				p.asteroid_rotation_speed = 100;
+
+				this._super(p);
+				this.add("2d");
+			},
+
+			step: function(delta)
+			{
+				this.p.angle += this.p.asteroid_rotation_speed * delta;
+			},
+		});
+
+
+		// The level with game objects in it
+		//
+		Q.scene("level1",function(stage)
+		{
+			var player = stage.insert(new Q.PlayerShip({x:  50, y:  50}));
+			var enemy  = stage.insert(new Q.Asteroid  ({x: 200, y: 200}));
+		});
+
+
+		// Game assets, level data, images, music, sounds
+		//
+		var assets = {
+			"ship_sprite": "playerShip1_blue.png",
+			"large_asteroid": "Meteors/meteorBrown_big1.png"
+		};
+
+
+		// Load assets and launch the first scene to start the game
+		//
+		Q.load(assets , function()
+		{
+			Q.gravityX = 0.0;
+			Q.gravityY = 0.0;
+
+			Q.stageScene("level1");
+		});
+   </script>
+   </body>
+</html>
